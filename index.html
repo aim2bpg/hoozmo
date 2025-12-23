@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoozmo - Ruby regex editor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  const allowed = new Set(["3.4", "3.3", "3.2"]);
+  const rubyParam = new URLSearchParams(location.search).get("ruby");
+  const version = allowed.has(rubyParam) ? rubyParam : "3.4";
+  
+  const pkgByVersion = {
+    "3.4": "@ruby/3.4-wasm-wasi@latest",
+    "3.3": "@ruby/3.3-wasm-wasi@latest",
+    "3.2": "@ruby/3.2-wasm-wasi@latest"
+  };
+  
+  const script = document.createElement("script");
+  script.src = `https://cdn.jsdelivr.net/npm/${pkgByVersion[version]}/dist/browser.script.iife.js`;
+  document.head.appendChild(script);
+</script>
+<script type="text/ruby">
+require 'js'
+
+class Hoozmo
+  def initialize(pattern)
+    @pattern = pattern
+  end
+
+  def match?(input)
+    @pattern == input
+  end
+end
+
+MATCH_STYLES = {
+  empty: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 text-transparent border border-transparent rounded leading-normal',
+  match: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#155724] bg-[#d4edda] border border-[#c3e6cb] leading-normal',
+  no_match: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#721c24] bg-[#f8d7da] border border-[#f5c6cb] leading-normal',
+  error: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#856404] bg-[#fff3cd] border border-[#ffeaa7] leading-normal'
+}.freeze
+
+def document
+  @document ||= JS.global[:document]
+end
+
+def update_match_info(state, message)
+  match_info = document.getElementById('match-info')
+  match_info[:className] = MATCH_STYLES[state]
+  match_info[:innerHTML] = message
+end
+
+def check_regex
+  pattern = document.getElementById('pattern')[:value].to_s
+  test = document.getElementById('test')[:value].to_s
+  
+  return update_match_info(:empty, '...') if pattern.empty?
+  
+  begin
+    regex = Hoozmo.new(pattern)
+    matched = regex.match?(test)
+    
+    if matched
+      update_match_info(:match, 'Match')
+    else
+      update_match_info(:no_match, 'No match')
+    end
+  rescue => e
+    update_match_info(:error, "Error: #{e.message}")
+  end
+end
+
+document.getElementById('pattern').addEventListener('input') { check_regex }
+document.getElementById('test').addEventListener('input') { check_regex }
+
+document.getElementById('reset').addEventListener('click') do
+  document.getElementById('pattern')[:value] = ''
+  document.getElementById('test')[:value] = ''
+  update_match_info(:empty, '...')
+end
+</script>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 700px; margin: 0 auto; padding: 2em 1.5em; line-height: 1.6; background: #f8f9fa;">
+<div class="bg-white p-8 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative">
+  <div class="absolute top-4 right-4">
+    <div class="flex items-center gap-2 text-[0.85em] text-[#7f8c8d]">
+      <span>Ruby</span>
+      <select id="ruby-version" class="px-1.5 py-0.5 border border-[#bdc3c7] rounded bg-white text-[0.95em] cursor-pointer">
+        <option value="3.4">3.4</option>
+        <option value="3.3">3.3</option>
+        <option value="3.2">3.2</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="text-center mb-6">
+    <h1 class="text-[2em] font-bold text-[#2c3e50] mb-1 leading-tight">
+      <a href="https://github.com/aim2bpg/hoozmo" target="_blank" class="text-[#CC342D] no-underline hover:opacity-70 transition-opacity">Hoozmo</a>
+      <span class="text-[0.6em] text-[#7f8c8d] font-normal"> (<a href="https://github.com/ydah/hoozuki" target="_blank" class="text-[#CC342D] no-underline border-b border-transparent hover:border-[#CC342D] transition-all">Hoozuki</a>-mod)</span>
+    </h1>
+    <p class="text-[#7f8c8d] m-0">a hobby regex engine written in Ruby</p>
+  </div>
+  
+  <div class="mb-4">
+    <div class="flex items-center mb-2">
+      <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
+      <div class="flex-1 flex justify-between items-center">
+        <label for="pattern" class="block m-0 font-semibold text-[#34495e] text-[0.95em] leading-normal">Your regular expression:</label>
+        <span id="match-info" class="inline-block text-[0.85em] font-medium px-1.5 py-0.5 text-transparent border border-transparent rounded leading-normal">...</span>
+      </div>
+      <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="font-mono text-[1.5em] font-bold text-[#7f8c8d] w-[0.5em] text-center shrink-0">/</span>
+      <input id="pattern" autocomplete="off" class="flex-1 min-w-0 p-3 font-mono text-[0.95em] border-2 border-[#e0e0e0] rounded transition-colors focus:outline-none focus:border-[#3498db]">
+      <span class="font-mono text-[1.5em] font-bold text-[#7f8c8d] w-[0.5em] text-center shrink-0">/</span>
+    </div>
+  </div>
+  
+  <div class="mb-4">
+    <div class="flex items-center mb-2">
+      <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
+      <label for="test" class="flex-1 block m-0 font-semibold text-[#34495e] text-[0.95em]">Your test string:</label>
+      <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
+    </div>
+    <div class="flex items-stretch gap-2">
+      <span class="w-[0.5em] shrink-0"></span>
+      <textarea id="test" class="flex-1 min-w-0 min-h-[120px] p-3 font-mono text-[0.95em] border-2 border-[#e0e0e0] rounded transition-colors resize-y focus:outline-none focus:border-[#3498db]" rows="5"></textarea>
+      <span class="w-[0.5em] shrink-0"></span>
+    </div>
+  </div>
+  
+  <div class="flex justify-center">
+    <button id="reset" class="px-1.5 py-0.5 bg-white text-[#34495e] border border-[#bdc3c7] rounded text-[0.95em] cursor-pointer transition-all hover:bg-[#ecf0f1] hover:border-[#95a5a6]">clear fields</button>
+  </div>
+</div>
+
+<script>
+  const versionSelect = document.getElementById('ruby-version');
+  const currentVersion = new URLSearchParams(location.search).get('ruby') || '3.4';
+  versionSelect.value = currentVersion;
+  
+  versionSelect.addEventListener('change', () => {
+    const params = new URLSearchParams(location.search);
+    params.set('ruby', versionSelect.value);
+    location.assign(`${location.pathname}?${params.toString()}`);
+  });
+</script>
+</body>
+</html>
