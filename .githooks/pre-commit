@@ -1,0 +1,21 @@
+#!/bin/sh
+# Run RuboCop and RSpec before allowing a commit
+set -e
+
+echo "Running RuboCop..."
+# Use bundle exec if available
+if command -v bundle >/dev/null 2>&1; then
+  bundle exec rubocop --format simple || { echo 'RuboCop failed'; exit 1; }
+else
+  rubocop --format simple || { echo 'RuboCop failed'; exit 1; }
+fi
+
+echo "Running RSpec..."
+if command -v bundle >/dev/null 2>&1; then
+  bundle exec rspec || { echo 'RSpec failed'; exit 1; }
+else
+  rspec || { echo 'RSpec failed'; exit 1; }
+fi
+
+echo "Pre-commit checks passed."
+exit 0
