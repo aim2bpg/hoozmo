@@ -1,0 +1,30 @@
+
+plugins:
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  SuggestExtensions: false
+
+Layout/LineLength:
+  Max: 120
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
+RSpec:
+  Enabled: true
+
+# Disable strict rule for multiple expectations in specs to reduce noise
+RSpec/MultipleExpectations:
+  Enabled: false
+
+# Allow slightly longer examples in specs
+RSpec/ExampleLength:
+  Max: 10
+
+# Disable documentation requirement for classes/modules (we prefer no noise comments)
+Style/Documentation:
+  Enabled: false

@@ -5,8 +5,8 @@ require_relative '../lib/hoozmo'
 RSpec.describe Hoozmo do
   describe '#match?' do
     context 'with exact match pattern' do
-      let(:hoozmo) { Hoozmo.new('abc') }
-      
+      let(:hoozmo) { described_class.new('abc') }
+
       it 'matches exact string' do
         expect(hoozmo.match?('abc')).to be true
       end
@@ -20,17 +20,17 @@ RSpec.describe Hoozmo do
       end
 
       it 'matches empty string' do
-        regex = Hoozmo.new('')
+        regex = described_class.new('')
         expect(regex.match?('')).to be true
       end
 
       it 'does not match empty pattern with non-empty input' do
-        regex = Hoozmo.new('')
+        regex = described_class.new('')
         expect(regex.match?('a')).to be false
       end
 
       it 'matches multibyte characters' do
-        regex = Hoozmo.new('こんにちは')
+        regex = described_class.new('こんにちは')
         expect(regex.match?('こんにちは')).to be true
         expect(regex.match?('さようなら')).to be false
       end
