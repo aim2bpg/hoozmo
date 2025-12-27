@@ -8,20 +8,22 @@ const MATCH_STYLES = {
 };
 
 async function initHoozmo(rubyVersion = '3.4') {
+
   const pkg = `@ruby/${rubyVersion}-wasm-wasi@latest`;
   const wasmUrl = `https://cdn.jsdelivr.net/npm/${pkg}/dist/ruby+stdlib.wasm`;
   const response = await fetch(wasmUrl);
   const module = await WebAssembly.compileStreaming(response);
   const { vm } = await DefaultRubyVM(module);
 
-  // Hoozmoライブラリをロード (require_relativeを使わないで全て読み込む)
-  const nodeLib = await fetch('/hoozmo/lib/hoozmo/node.rb').then(r => r.text());
-  const literalLib = await fetch('/hoozmo/lib/hoozmo/node/literal.rb').then(r => r.text());
-  const concatenationLib = await fetch('/hoozmo/lib/hoozmo/node/concatenation.rb').then(r => r.text());
-  const choiceLib = await fetch('/hoozmo/lib/hoozmo/node/choice.rb').then(r => r.text());
-  const epsilonLib = await fetch('/hoozmo/lib/hoozmo/node/epsilon.rb').then(r => r.text());
-  const parserLib = await fetch('/hoozmo/lib/hoozmo/parser.rb').then(r => r.text());
-  const hoozmoLib = await fetch('/hoozmo/lib/hoozmo.rb').then(r => r.text());
+  // baseパスを考慮してfetch
+  const base = import.meta.env.BASE_URL || '/';
+  const nodeLib = await fetch(`${base}lib/hoozmo/node.rb`).then(r => r.text());
+  const literalLib = await fetch(`${base}lib/hoozmo/node/literal.rb`).then(r => r.text());
+  const concatenationLib = await fetch(`${base}lib/hoozmo/node/concatenation.rb`).then(r => r.text());
+  const choiceLib = await fetch(`${base}lib/hoozmo/node/choice.rb`).then(r => r.text());
+  const epsilonLib = await fetch(`${base}lib/hoozmo/node/epsilon.rb`).then(r => r.text());
+  const parserLib = await fetch(`${base}lib/hoozmo/parser.rb`).then(r => r.text());
+  const hoozmoLib = await fetch(`${base}lib/hoozmo.rb`).then(r => r.text());
 
   // require_relativeを削除して結合
   const nodeLibClean = nodeLib.replace(/require_relative .+/g, '');
