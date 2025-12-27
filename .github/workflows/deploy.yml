@@ -35,6 +35,12 @@ jobs:
       
       - name: Build
         run: npm run build
+
+      - name: Disable Jekyll
+        run: |
+          if [ -d ./dist ]; then
+            touch ./dist/.nojekyll
+          fi
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
