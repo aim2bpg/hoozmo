@@ -5,80 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hoozmo - Ruby regex editor</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script>
-  const allowed = new Set(["3.4", "3.3", "3.2"]);
-  const rubyParam = new URLSearchParams(location.search).get("ruby");
-  const version = allowed.has(rubyParam) ? rubyParam : "3.4";
-  
-  const pkgByVersion = {
-    "3.4": "@ruby/3.4-wasm-wasi@latest",
-    "3.3": "@ruby/3.3-wasm-wasi@latest",
-    "3.2": "@ruby/3.2-wasm-wasi@latest"
-  };
-  
-  const script = document.createElement("script");
-  script.src = `https://cdn.jsdelivr.net/npm/${pkgByVersion[version]}/dist/browser.script.iife.js`;
-  document.head.appendChild(script);
-</script>
-<script type="text/ruby">
-require 'js'
-
-class Hoozmo
-  def initialize(pattern)
-    @pattern = pattern
-  end
-
-  def match?(input)
-    @pattern == input
-  end
-end
-
-MATCH_STYLES = {
-  empty: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 text-transparent border border-transparent rounded leading-normal',
-  match: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#155724] bg-[#d4edda] border border-[#c3e6cb] leading-normal',
-  no_match: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#721c24] bg-[#f8d7da] border border-[#f5c6cb] leading-normal',
-  error: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#856404] bg-[#fff3cd] border border-[#ffeaa7] leading-normal'
-}.freeze
-
-def document
-  @document ||= JS.global[:document]
-end
-
-def update_match_info(state, message)
-  match_info = document.getElementById('match-info')
-  match_info[:className] = MATCH_STYLES[state]
-  match_info[:innerHTML] = message
-end
-
-def check_regex
-  pattern = document.getElementById('pattern')[:value].to_s
-  test = document.getElementById('test')[:value].to_s
-  
-  return update_match_info(:empty, '...') if pattern.empty?
-  
-  begin
-    regex = Hoozmo.new(pattern)
-    matched = regex.match?(test)
-    
-    if matched
-      update_match_info(:match, 'Match')
-    else
-      update_match_info(:no_match, 'No match')
-    end
-  rescue => e
-    update_match_info(:error, "Error: #{e.message}")
-  end
-end
-
-document.getElementById('pattern').addEventListener('input') { check_regex }
-document.getElementById('test').addEventListener('input') { check_regex }
-
-document.getElementById('reset').addEventListener('click') do
-  document.getElementById('pattern')[:value] = ''
-  document.getElementById('test')[:value] = ''
-  update_match_info(:empty, '...')
-end
-</script>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 700px; margin: 0 auto; padding: 2em 1.5em; line-height: 1.6; background: #f8f9fa;">
 <div class="bg-white p-8 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative">
@@ -135,17 +61,60 @@ end
   </div>
 </div>
 
+  <!-- Examples -->
+  <div class="mt-8 max-w-3xl mx-auto text-[#34495e]">
+    <h2 class="text-[1.1em] font-semibold mb-2">Examples (supported features)</h2>
+    <p class="text-[0.95em] text-[#7f8c8d] mb-3">Click an example to insert the pattern and test string into the fields.</p>
+    <div class="grid grid-cols-1 gap-2">
+      <div class="flex items-center justify-between bg-white p-3 rounded border">
+        <div>
+          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">abc</span></div>
+          <div class="text-[0.9em] text-[#7f8c8d]">Matches the literal string <code>abc</code>.</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="abc" data-test="abc">Insert</button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between bg-white p-3 rounded border">
+        <div>
+          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a|b</span></div>
+          <div class="text-[0.9em] text-[#7f8c8d]">Alternation: matches <code>a</code> or <code>b</code>.</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a|b" data-test="b">Insert</button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between bg-white p-3 rounded border">
+        <div>
+          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a|b|c</span></div>
+          <div class="text-[0.9em] text-[#7f8c8d]">Multiple alternatives.</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a|b|c" data-test="c">Insert</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script type="module" src="/main.js"></script>
 <script>
-  const versionSelect = document.getElementById('ruby-version');
-  const currentVersion = new URLSearchParams(location.search).get('ruby') || '3.4';
-  versionSelect.value = currentVersion;
-  
-  versionSelect.addEventListener('change', () => {
-    const params = new URLSearchParams(location.search);
-    params.set('ruby', versionSelect.value);
-    const newUrl = `${location.pathname}?${params.toString()}`;
-    window.history.replaceState({}, '', newUrl);
-    location.reload();
+  // wire up example buttons to insert pattern/test values
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.example-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = btn.getAttribute('data-pattern') ?? '';
+        const t = btn.getAttribute('data-test') ?? '';
+        const patternEl = document.getElementById('pattern');
+        const testEl = document.getElementById('test');
+        if (patternEl) patternEl.value = p;
+        if (testEl) testEl.value = t;
+        // trigger input events so main.js will re-evaluate
+        patternEl?.dispatchEvent(new Event('input'));
+        testEl?.dispatchEvent(new Event('input'));
+      });
+    });
   });
 </script>
 </body>

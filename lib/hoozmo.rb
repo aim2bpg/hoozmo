@@ -23,6 +23,10 @@ class Hoozmo
       match_literal(node, input, pos)
     when Node::Concatenation
       match_concatenation(node, input, pos)
+    when Node::Choice
+      match_choice(node, input, pos)
+    when Node::Epsilon
+      pos # 何も消費せず、現在位置を返す
     else
       false
     end
@@ -49,6 +53,21 @@ class Hoozmo
     end
 
     # すべての子ノードがマッチ、最終位置を返す
+    pos
+  end
+
+  def match_choice(node, input, pos)
+    # 各選択肢を順番に試す
+    node.children.each do |child|
+      result = match_node(child, input, pos)
+      return result if result # 成功したらその結果を返す
+    end
+
+    # すべての選択肢が失敗
+    false
+  end
+
+  def match_epsilon(_node, _input, pos)
     pos
   end
 end
