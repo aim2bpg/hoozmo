@@ -1,0 +1,39 @@
+# See also:
+# https://github.com/aim2bpg/rubree/wiki/Using-PAT-to-Trigger-Workflows-After-Auto‐Merge-in-GitHub-Actions
+
+name: Dependabot auto-merge
+
+on: pull_request_target
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dependabot-auto-merge
+  cancel-in-progress: false
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: '${{ secrets.PAT }}'
+
+      - name: Enable auto-merge for Dependabot PRs
+        if: ${{ steps.metadata.outputs.update-type != 'version-update:semver-major' }}
+        run: |
+          n=0
+          until [ $n -ge 3 ]; do
+            gh pr merge --auto --squash "$PR_URL" && break
+            echo "Retrying auto-merge... ($((n+1)))"
+            n=$((n+1))
+            sleep 5
+          done
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}

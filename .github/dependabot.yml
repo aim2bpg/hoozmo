@@ -1,6 +1,54 @@
 version: 2
+
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: bundler
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: daily
+      time: '12:00'
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 10
+    versioning-strategy: lockfile-only
+    allow:
+      - dependency-type: direct
+      - dependency-type: indirect
+    labels:
+      - dependencies
+      - ruby
+    groups:
+      ruby:
+        patterns:
+          - 'rake'
+      rubocop:
+        patterns:
+          - 'rubocop*'
+      rspec:
+        patterns:
+          - 'rspec*'
+
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: daily
+      time: '12:00'
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 10
+    versioning-strategy: auto
+    labels:
+      - dependencies
+      - javascript
+    groups:
+      others:
+        patterns:
+          - '@ruby/wasm-wasi'
+          - 'vite'
+
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: daily
+      time: '12:00'
+      timezone: Asia/Tokyo
+    labels:
+      - dependencies
+      - gh-action
