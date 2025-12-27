@@ -8,20 +8,11 @@ class Hoozmo
     end
 
     def parse
-      children = []
+      ast = parse_choice
 
-      # 文字列を最後まで読む
-      until eol?
-        char = current
-        children << Node::Literal.new(char)
-        next_char
-      end
+      raise 'Unexpected end of pattern' unless eol?
 
-      # 子ノードが1つだけならそれを返す
-      return children.first if children.length == 1
-
-      # 複数あればConcatenationで包む
-      Node::Concatenation.new(children)
+      ast
     end
 
     private
@@ -36,6 +27,48 @@ class Hoozmo
 
     def next_char
       @offset += 1
+    end
+
+    def parse_choice
+      children = []
+      children << parse_concatenation
+
+      while current == '|'
+        next_char
+        children << parse_concatenation
+      end
+
+      return children.first if children.length == 1
+
+      Node::Choice.new(children)
+    end
+
+    def parse_concatenation
+      children = []
+
+      children << parse_literal until stop_parsing_concatenation?
+
+      return children.first if children.length == 1
+      return Node::Epsilon.new if children.empty?
+
+      Node::Concatenation.new(children)
+    end
+
+    def stop_parsing_concatenation?
+      eol? || current == '|'
+    end
+
+    def parse_literal
+      raise 'Unexpected end of pattern' if eol?
+
+      char = current
+      case char
+      when '|'
+        raise "Unexpected character: #{char}"
+      else
+        next_char
+        Node::Literal.new(char)
+      end
     end
   end
 end
