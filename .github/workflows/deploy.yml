@@ -36,9 +36,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Copy lib to dist
-        run: cp -r lib dist/
-
       - name: Disable Jekyll
         run: |
           if [ -d ./dist ]; then
