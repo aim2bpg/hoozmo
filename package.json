@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "mkdir -p public/lib && cp -r lib/* public/lib/",
-    "build": "vite build",
+    "build": "vite prebuild && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
