@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/hoozmo/' : '/',
-  // allow overriding public dir via env var so we can use a temporary folder during CI/build
+  base: '/hoozmo/',
   publicDir: 'public',
   build: {
     outDir: 'dist',
