@@ -23,11 +23,15 @@ async function initHoozmo(rubyVersion = '3.4') {
   const choiceLib = await fetch(`${base}lib/hoozmo/node/choice.rb`).then(r => r.text());
   const epsilonLib = await fetch(`${base}lib/hoozmo/node/epsilon.rb`).then(r => r.text());
   const parserLib = await fetch(`${base}lib/hoozmo/parser.rb`).then(r => r.text());
+  const nfaLib = await fetch(`${base}lib/hoozmo/automaton/nfa.rb`).then(r => r.text());
+  const stateIdLib = await fetch(`${base}lib/hoozmo/automaton/state_id.rb`).then(r => r.text());
   const hoozmoLib = await fetch(`${base}lib/hoozmo.rb`).then(r => r.text());
 
   // require_relativeを削除して結合
   const nodeLibClean = nodeLib.replace(/require_relative .+/g, '');
   const hoozmoLibClean = hoozmoLib.replace(/require_relative .+/g, '');
+  const nfaLibClean = nfaLib.replace(/require_relative .+/g, '');
+  const stateIdLibClean = stateIdLib.replace(/require_relative .+/g, '');
 
   // 依存順に評価
   vm.eval(nodeLibClean);
@@ -36,6 +40,8 @@ async function initHoozmo(rubyVersion = '3.4') {
   vm.eval(choiceLib);
   vm.eval(epsilonLib);
   vm.eval(parserLib);
+  vm.eval(stateIdLibClean);
+  vm.eval(nfaLibClean);
   vm.eval(hoozmoLibClean);
 
   return vm;
