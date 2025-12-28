@@ -2,17 +2,18 @@
 
 require_relative 'hoozmo/node'
 require_relative 'hoozmo/parser'
+require_relative 'hoozmo/automaton'
 
 class Hoozmo
   def initialize(pattern)
     @pattern = pattern
-    @ast = Parser.new(pattern).parse
+
+    ast = Parser.new(pattern).parse
+    @nfa = Automaton::NFA.new_from_node(ast, Automaton::StateID.new(0))
   end
 
   def match?(input)
-    result = match_node(@ast, input, 0)
-    # マッチング成功 かつ 入力を全て消費した
-    result && result == input.length
+    @nfa.match?(input)
   end
 
   private
