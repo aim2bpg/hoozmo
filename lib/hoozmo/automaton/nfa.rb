@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'sorted_set'
+# require 'sorted_set'  # wasm環境でエラーとなるため、Setで代用
 
 class Hoozmo
   module Automaton
@@ -147,7 +147,8 @@ class Hoozmo
           end
         end
 
-        ::SortedSet.new(visited) # 状態集合の比較のためにSortedSetで返す
+        # ::SortedSet.new(visited) # 状態集合の比較のためにSortedSetで返す(wasm環境でエラーとなるため、Setで代用)
+        visited # 状態集合の比較のためにSetで返す
       end
     end
   end
