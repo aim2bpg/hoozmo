@@ -83,4 +83,42 @@ RSpec.describe Hoozmo do
       end
     end
   end
+
+  context 'with grouped patterns' do
+    it 'matches pattern with simple grouping' do
+      regex = described_class.new('a(b|c)d')
+
+      expect(regex.match?('abd')).to be true
+      expect(regex.match?('acd')).to be true
+      expect(regex.match?('ad')).to be false
+      expect(regex.match?('abcd')).to be false
+    end
+
+    it 'matches pattern with nested grouping' do
+      regex = described_class.new('a((b|c)|d)e')
+
+      expect(regex.match?('abe')).to be true
+      expect(regex.match?('ace')).to be true
+      expect(regex.match?('ade')).to be true
+      expect(regex.match?('ae')).to be false
+    end
+
+    it 'matches pattern with empty alternative' do
+      regex = described_class.new('ab(cd|)ef')
+
+      expect(regex.match?('abcdef')).to be true
+      expect(regex.match?('abef')).to be true
+    end
+
+    it 'matches complex pattern' do
+      regex = described_class.new('(a|b)(c|d)')
+
+      expect(regex.match?('ac')).to be true
+      expect(regex.match?('ad')).to be true
+      expect(regex.match?('bc')).to be true
+      expect(regex.match?('bd')).to be true
+      expect(regex.match?('ab')).to be false
+      expect(regex.match?('cd')).to be false
+    end
+  end
 end
