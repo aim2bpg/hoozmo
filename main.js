@@ -7,7 +7,7 @@ const MATCH_STYLES = {
   error: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#856404] bg-[#fff3cd] border border-[#ffeaa7] leading-normal'
 };
 
-async function initHoozmo(rubyVersion = '3.4') {
+async function initHoozmo(rubyVersion = '4.0') {
 
   const pkg = `@ruby/${rubyVersion}-wasm-wasi@latest`;
   const wasmUrl = `https://cdn.jsdelivr.net/npm/${pkg}/dist/ruby+stdlib.wasm`;
@@ -66,7 +66,7 @@ async function main() {
     updateMatchInfo('empty', 'Loading Ruby...');
     
     let versionSelect = document.getElementById('ruby-version');
-    const currentVersion = new URLSearchParams(location.search).get('ruby') || versionSelect?.value || '3.4';
+    const currentVersion = new URLSearchParams(location.search).get('ruby') || versionSelect?.value || '4.0';
     const vm = await initHoozmo(currentVersion);
     
     updateMatchInfo('empty', '...');
@@ -111,7 +111,7 @@ async function main() {
 
     // Ruby version selector (handled above before init)
     if (versionSelect) {
-      const currentVersion = new URLSearchParams(location.search).get('ruby') || versionSelect.value || '3.4';
+      const currentVersion = new URLSearchParams(location.search).get('ruby') || versionSelect.value || '4.0';
       versionSelect.value = currentVersion;
       versionSelect.addEventListener('change', () => {
         const params = new URLSearchParams(location.search);
