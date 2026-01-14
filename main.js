@@ -25,6 +25,7 @@ async function initHoozmo(rubyVersion = '3.4') {
   const parserLib = await fetch(`${base}lib/hoozmo/parser.rb`).then(r => r.text());
   const nfaLib = await fetch(`${base}lib/hoozmo/automaton/nfa.rb`).then(r => r.text());
   const stateIdLib = await fetch(`${base}lib/hoozmo/automaton/state_id.rb`).then(r => r.text());
+  const dfaLib = await fetch(`${base}lib/hoozmo/automaton/dfa.rb`).then(r => r.text());
   const hoozmoLib = await fetch(`${base}lib/hoozmo.rb`).then(r => r.text());
 
   // require_relativeを削除して結合
@@ -32,6 +33,7 @@ async function initHoozmo(rubyVersion = '3.4') {
   const hoozmoLibClean = hoozmoLib.replace(/require_relative .+/g, '');
   const nfaLibClean = nfaLib.replace(/require_relative .+/g, '');
   const stateIdLibClean = stateIdLib.replace(/require_relative .+/g, '');
+  const dfaLibClean = dfaLib.replace(/require_relative .+/g, '');
 
   // 依存順に評価
   vm.eval(nodeLibClean);
@@ -42,6 +44,7 @@ async function initHoozmo(rubyVersion = '3.4') {
   vm.eval(parserLib);
   vm.eval(stateIdLibClean);
   vm.eval(nfaLibClean);
+  vm.eval(dfaLibClean);
   vm.eval(hoozmoLibClean);
 
   return vm;
