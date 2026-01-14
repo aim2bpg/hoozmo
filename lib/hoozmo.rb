@@ -9,14 +9,19 @@ class Hoozmo
     @pattern = pattern
 
     ast = Parser.new(pattern).parse
-    @nfa = Automaton::NFA.new_from_node(ast, Automaton::StateID.new(0))
+    nfa = Automaton::NFA.new_from_node(ast, Automaton::StateID.new(0))
+    @dfa = Automaton::DFA.from_nfa(nfa, use_cache: use_cache?(pattern))
   end
 
   def match?(input)
-    @nfa.match?(input)
+    @dfa.match?(input, use_cache: use_cache?(input))
   end
 
   private
+
+  def use_cache?(str)
+    str.length > 1000
+  end
 
   def match_node(node, input, pos)
     case node

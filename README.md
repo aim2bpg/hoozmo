@@ -35,16 +35,34 @@ npm run dev
 
 ## Supported features
 
-Hoozmo implements a tiny, educational regular-expression language. The following features are supported by the parser and matcher included in `lib/` and in the browser demo:
+Hoozmo provides a minimal, educational regular-expression engine suitable for learning and experimentation. The parser and matcher in `lib/` (and the browser demo) support the core constructs below.
 
-- Literals: single characters are matched literally (e.g. `a`, `b`, `1`).
-- Concatenation: adjacent characters form a sequence (e.g. `abc` matches `abc`).
-- Choice / Alternation: the `|` operator selects between alternatives (e.g. `a|b` matches `a` or `b`).
+- **Literals**: match single characters exactly (examples: `a`, `b`, `1`).
+- **Concatenation**: adjacent tokens are matched in sequence (example: `abc` matches `abc`).
+- **Grouping**: parentheses `()` create groups for sequencing or alternation (example: `a(bc)d`).
+- **Alternation / Choice**: the `|` operator selects between alternatives (examples: `a|b`, `a|b|c`).
+- **Nested groups**: groups may be nested to express more complex structure (example: `a((b|c)|d)e`).
+
+Notes:
+- This project focuses on clarity and pedagogical value rather than full PCRE compatibility.
+- To add features, update the parser in `lib/hoozmo/parser.rb` and add tests under `spec/`.
 
 Examples (these are also available in the browser demo):
 
 - `abc` — literal concatenation, matches exactly `abc`.
 - `a|b` — alternation, matches `a` or `b`.
 - `a|b|c` — multiple alternatives.
+- `a(b|c)d` — grouping with alternation (e.g. matches `acd`).
+- `a((b|c)|d)e` — nested grouping with alternation (e.g. matches `ade`).
+ 
+### Browser demo examples (pattern + test string)
+
+- Pattern: `abc` — Test string: `abc`
+- Pattern: `a|b` — Test string: `b`
+- Pattern: `a|b|c` — Test string: `c`
+- Pattern: `a(b|c)d` — Test string: `acd`
+- Pattern: `a((b|c)|d)e` — Test string: `ade`
+
+Browser demo: open the project in a browser (or run the dev server with `npm run dev`) and open `index.html` — the Examples panel on the page inserts the pattern and test string into the fields when clicked.
 
 If you want to extend the parser with additional features, add tests under `spec/` and update `lib/hoozmo/parser.rb` and `lib/hoozmo.rb` accordingly.
