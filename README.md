@@ -42,6 +42,7 @@ Hoozmo provides a minimal, educational regular-expression engine suitable for le
 - **Grouping**: parentheses `()` create groups for sequencing or alternation (example: `a(bc)d`).
 - **Alternation / Choice**: the `|` operator selects between alternatives (examples: `a|b`, `a|b|c`).
 - **Nested groups**: groups may be nested to express more complex structure (example: `a((b|c)|d)e`).
+- **Kleene closure / Repetition**: `*` matches the preceding element zero or more times (example: `a*`).
 
 Notes:
 - This project focuses on clarity and pedagogical value rather than full PCRE compatibility.
@@ -54,6 +55,7 @@ Examples (these are also available in the browser demo):
 - `a|b|c` — multiple alternatives.
 - `a(b|c)d` — grouping with alternation (e.g. matches `acd`).
 - `a((b|c)|d)e` — nested grouping with alternation (e.g. matches `ade`).
+- `a*` — Matches zero or more (e.g. `a*`).
  
 ### Browser demo examples (pattern + test string)
 
@@ -62,6 +64,7 @@ Examples (these are also available in the browser demo):
 - Pattern: `a|b|c` — Test string: `c`
 - Pattern: `a(b|c)d` — Test string: `acd`
 - Pattern: `a((b|c)|d)e` — Test string: `ade`
+- Pattern: `a*` — Test string: `aaa`
 
 Browser demo: open the project in a browser (or run the dev server with `npm run dev`) and open `index.html` — the Examples panel on the page inserts the pattern and test string into the fields when clicked.
 
