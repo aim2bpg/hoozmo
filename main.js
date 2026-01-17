@@ -21,6 +21,7 @@ async function initHoozmo(rubyVersion = '4.0') {
   const literalLib = await fetch(`${base}lib/hoozmo/node/literal.rb`).then(r => r.text());
   const concatenationLib = await fetch(`${base}lib/hoozmo/node/concatenation.rb`).then(r => r.text());
   const choiceLib = await fetch(`${base}lib/hoozmo/node/choice.rb`).then(r => r.text());
+  const repetitionLib = await fetch(`${base}lib/hoozmo/node/repetition.rb`).then(r => r.text());
   const epsilonLib = await fetch(`${base}lib/hoozmo/node/epsilon.rb`).then(r => r.text());
   const parserLib = await fetch(`${base}lib/hoozmo/parser.rb`).then(r => r.text());
   const nfaLib = await fetch(`${base}lib/hoozmo/automaton/nfa.rb`).then(r => r.text());
@@ -34,12 +35,14 @@ async function initHoozmo(rubyVersion = '4.0') {
   const nfaLibClean = nfaLib.replace(/require_relative .+/g, '');
   const stateIdLibClean = stateIdLib.replace(/require_relative .+/g, '');
   const dfaLibClean = dfaLib.replace(/require_relative .+/g, '');
+  const repetitionLibClean = repetitionLib.replace(/require_relative .+/g, '');
 
   // 依存順に評価
   vm.eval(nodeLibClean);
   vm.eval(literalLib);
   vm.eval(concatenationLib);
   vm.eval(choiceLib);
+  vm.eval(repetitionLibClean);
   vm.eval(epsilonLib);
   vm.eval(parserLib);
   vm.eval(stateIdLibClean);
