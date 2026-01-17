@@ -47,7 +47,7 @@ class Hoozmo
       children = []
 
       until stop_parsing_concatenation?
-        children << parse_group # parse_literal から parse_group に変更
+        children << parse_repetition # parse_group から parse_repetition に変更
       end
 
       return children.first if children.length == 1
@@ -91,6 +91,25 @@ class Hoozmo
 
       next_char # ')' をスキップ
       child
+    end
+
+    def parse_repetition
+      child = parse_group
+
+      quantifier = nil
+      case current
+      when '*'
+        quantifier = :zero_or_more
+      when '+'
+        quantifier = :one_or_more
+      when '?'
+        quantifier = :optional
+      end
+
+      return child if quantifier.nil?
+
+      next_char
+      Node::Repetition.new(child, quantifier)
     end
   end
 end

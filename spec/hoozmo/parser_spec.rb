@@ -144,4 +144,34 @@ RSpec.describe Hoozmo::Parser do
       end.to raise_error(/Expected closing parenthesis/)
     end
   end
+
+  context 'with repetition' do
+    it 'parses zero-or-more pattern' do
+      ast = described_class.new('a*').parse
+
+      expect(ast).to be_a(Hoozmo::Node::Repetition)
+      expect(ast.zero_or_more?).to be true
+      expect(ast.child).to be_a(Hoozmo::Node::Literal)
+      expect(ast.child.value).to eq('a')
+    end
+
+    it 'parses group repetition' do
+      ast = described_class.new('(ab)*').parse
+
+      expect(ast).to be_a(Hoozmo::Node::Repetition)
+      expect(ast.child).to be_a(Hoozmo::Node::Concatenation)
+      expect(ast.child.children.length).to eq(2)
+    end
+
+    it 'parses complex pattern with repetition' do
+      ast = described_class.new('a(bb)*d').parse
+
+      expect(ast).to be_a(Hoozmo::Node::Concatenation)
+      expect(ast.children.length).to eq(3)
+
+      # 中央の繰り返し部分
+      repetition = ast.children[1]
+      expect(repetition).to be_a(Hoozmo::Node::Repetition)
+    end
+  end
 end

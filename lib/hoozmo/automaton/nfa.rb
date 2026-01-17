@@ -33,6 +33,12 @@ class Hoozmo
           build_concatenation(node, state)
         when Node::Choice
           build_choice(node, state)
+        when Node::Repetition
+          if node.zero_or_more?
+            build_zero_or_more(node.child, state)
+            # elsif node.one_or_more?  # 次章で実装
+            # elsif node.optional?     # 次章で実装
+          end
         else
           raise ArgumentError, "Unsupported node type: #{node.class}"
         end
@@ -149,6 +155,37 @@ class Hoozmo
 
         # ::SortedSet.new(visited) # 状態集合の比較のためにSortedSetで返す(wasm環境でエラーとなるため、Setで代用)
         visited # 状態集合の比較のためにSetで返す
+      end
+
+      def self.build_zero_or_more(child_node, state)
+        # 子ノードのNFAを構築
+        child_nfa = new_from_node(child_node, state)
+
+        # 新しい開始状態と受理状態
+        start_state = state.new_state
+        accept_state = state.new_state
+
+        nfa = new(start_state, [accept_state])
+
+        # 子NFAの遷移をマージ
+        nfa.transitions.merge(child_nfa.transitions)
+
+        # 新しい開始状態から子NFAの開始へ（1回目の実行）
+        nfa.add_epsilon_transition(start_state, child_nfa.start)
+
+        # 新しい開始状態から受理状態へ（0回の繰り返し）
+        nfa.add_epsilon_transition(start_state, accept_state)
+
+        # 子NFAの各受理状態から:
+        child_nfa.accept.each do |child_accept|
+          # 新しい受理状態へ（終了）
+          nfa.add_epsilon_transition(child_accept, accept_state)
+
+          # 子NFAの開始へ戻る（ループバック）
+          nfa.add_epsilon_transition(child_accept, child_nfa.start)
+        end
+
+        nfa
       end
     end
   end
