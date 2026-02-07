@@ -43,6 +43,8 @@ Hoozmo provides a minimal, educational regular-expression engine suitable for le
 - **Alternation / Choice**: the `|` operator selects between alternatives (examples: `a|b`, `a|b|c`).
 - **Nested groups**: groups may be nested to express more complex structure (example: `a((b|c)|d)e`).
 - **Kleene closure / Repetition**: `*` matches the preceding element zero or more times (example: `a*`).
+- **One or more**: `+` matches the preceding element one or more times (example: `a+`).
+- **Optional**: `?` makes the preceding element optional (zero or one) (example: `a?`).
 
 Notes:
 - This project focuses on clarity and pedagogical value rather than full PCRE compatibility.
@@ -56,6 +58,9 @@ Examples (these are also available in the browser demo):
 - `a(b|c)d` — grouping with alternation (e.g. matches `acd`).
 - `a((b|c)|d)e` — nested grouping with alternation (e.g. matches `ade`).
 - `a*` — Matches zero or more (e.g. `a*`).
+- `a+` — Matches one or more (e.g. `a+`).
+- `a?` — Optional (zero or one, e.g. `a?`).
+- `a+b*c?` — Combined quantifiers example.
  
 ### Browser demo examples (pattern + test string)
 
@@ -65,6 +70,9 @@ Examples (these are also available in the browser demo):
 - Pattern: `a(b|c)d` — Test string: `acd`
 - Pattern: `a((b|c)|d)e` — Test string: `ade`
 - Pattern: `a*` — Test string: `aaa`
+- Pattern: `a+` — Test string: `aaa`
+- Pattern: `a?` — Test string: `a`
+- Pattern: `a+b*c?` — Test string: `aabbc`
 
 Browser demo: open the project in a browser (or run the dev server with `npm run dev`) and open `index.html` — the Examples panel on the page inserts the pattern and test string into the fields when clicked.
 
