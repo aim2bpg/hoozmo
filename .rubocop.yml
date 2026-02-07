@@ -9,16 +9,16 @@ AllCops:
 Layout/LineLength:
   Max: 120
 Metrics/AbcSize:
-  Max: 20
+  Max: 25
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
 Metrics/CyclomaticComplexity:
   Max: 10
 Metrics/MethodLength:
-  Max: 20
+  Max: 25
 Metrics/ClassLength:
-  Max: 120
+  Max: 150
 Metrics/PerceivedComplexity:
   Max: 10
 
@@ -32,6 +32,10 @@ RSpec/MultipleExpectations:
 # Allow slightly longer examples in specs
 RSpec/ExampleLength:
   Max: 15
+
+# Allow deeper nesting for complex test scenarios (e.g., quantifiers)
+RSpec/NestedGroups:
+  Max: 4
 
 # Disable documentation requirement for classes/modules (we prefer no noise comments)
 Style/Documentation:

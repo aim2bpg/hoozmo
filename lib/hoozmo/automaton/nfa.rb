@@ -36,8 +36,12 @@ class Hoozmo
         when Node::Repetition
           if node.zero_or_more?
             build_zero_or_more(node.child, state)
-            # elsif node.one_or_more?  # 次章で実装
-            # elsif node.optional?     # 次章で実装
+          elsif node.one_or_more?
+            build_one_or_more(node.child, state)
+          elsif node.optional?
+            build_optional(node.child, state)
+          else
+            raise ArgumentError, 'Unsupported quantifier'
           end
         else
           raise ArgumentError, "Unsupported node type: #{node.class}"
@@ -184,6 +188,52 @@ class Hoozmo
           # 子NFAの開始へ戻る（ループバック）
           nfa.add_epsilon_transition(child_accept, child_nfa.start)
         end
+
+        nfa
+      end
+
+      def self.build_one_or_more(child_node, state)
+        # 子ノードのNFAを構築
+        child_nfa = new_from_node(child_node, state)
+
+        # 新しい開始状態と受理状態
+        start_state = state.new_state
+        accept_state = state.new_state
+
+        nfa = new(start_state, [accept_state])
+
+        # 子NFAの遷移をマージ
+        nfa.transitions.merge(child_nfa.transitions)
+
+        # start → 子NFAの開始（必ず1回は通る）
+        nfa.add_epsilon_transition(start_state, child_nfa.start)
+
+        # 子NFAの受理 → accept（終了）
+        child_nfa.accept.each do |child_accept|
+          nfa.add_epsilon_transition(child_accept, accept_state)
+
+          # 子NFAの受理 → 子NFAの開始へ（ループバック）
+          nfa.add_epsilon_transition(child_accept, child_nfa.start)
+        end
+
+        # startからacceptへの直接遷移はない！
+
+        nfa
+      end
+
+      def self.build_optional(child_node, state)
+        child_nfa = new_from_node(child_node, state)
+        start_state = state.new_state
+
+        # 開始状態自体を受理状態に含める（0回の選択肢）
+        accepts = child_nfa.accept.dup
+        accepts << start_state
+
+        nfa = new(start_state, accepts)
+        nfa.transitions.merge(child_nfa.transitions)
+
+        # start → 子NFAの開始（1回の選択肢）
+        nfa.add_epsilon_transition(start_state, child_nfa.start)
 
         nfa
       end
