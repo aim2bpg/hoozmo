@@ -45,6 +45,8 @@ Hoozmo provides a minimal, educational regular-expression engine suitable for le
 - **Kleene closure / Repetition**: `*` matches the preceding element zero or more times (example: `a*`).
 - **One or more**: `+` matches the preceding element one or more times (example: `a+`).
 - **Optional**: `?` makes the preceding element optional (zero or one) (example: `a?`).
+- **Escape sequences**: special characters can be escaped with backslash `\` (examples: `\*`, `\(`, `\)`, `\|`, `\\`).
+- **Substring matching**: patterns match anywhere in the input string (like most regex engines).
 
 Notes:
 - This project focuses on clarity and pedagogical value rather than full PCRE compatibility.
@@ -61,6 +63,8 @@ Examples (these are also available in the browser demo):
 - `a+` — Matches one or more (e.g. `a+`).
 - `a?` — Optional (zero or one, e.g. `a?`).
 - `a+b*c?` — Combined quantifiers example.
+- `a\*b` — Escaped asterisk (matches literal `a*b`).
+- `cat` — Substring matching (finds `cat` anywhere in the input).
  
 ### Browser demo examples (pattern + test string)
 
@@ -73,6 +77,8 @@ Examples (these are also available in the browser demo):
 - Pattern: `a+` — Test string: `aaa`
 - Pattern: `a?` — Test string: `a`
 - Pattern: `a+b*c?` — Test string: `aabbc`
+- Pattern: `a\*b` — Test string: `a*b` (escaped asterisk)
+- Pattern: `cat` — Test string: `concatenate` (substring match)
 
 Browser demo: open the project in a browser (or run the dev server with `npm run dev`) and open `index.html` — the Examples panel on the page inserts the pattern and test string into the fields when clicked.
 

@@ -156,6 +156,26 @@
           <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a+b*c?" data-test="aabbc">Insert</button>
         </div>
       </div>
+
+      <div class="flex items-center justify-between bg-white p-3 rounded border">
+        <div>
+          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a\*b</span></div>
+          <div class="text-[0.9em] text-[#7f8c8d]">Escaped asterisk (literal <code>*</code>).</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a\*b" data-test="a*b">Insert</button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between bg-white p-3 rounded border">
+        <div>
+          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">cat</span></div>
+          <div class="text-[0.9em] text-[#7f8c8d]">Substring matching: finds <code>cat</code> anywhere.</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="cat" data-test="concatenate">Insert</button>
+        </div>
+      </div>
     </div>
   </div>
 
