@@ -24,6 +24,7 @@ async function initHoozmo(rubyVersion = '4.0') {
   const repetitionLib = await fetch(`${base}lib/hoozmo/node/repetition.rb`).then(r => r.text());
   const epsilonLib = await fetch(`${base}lib/hoozmo/node/epsilon.rb`).then(r => r.text());
   const parserLib = await fetch(`${base}lib/hoozmo/parser.rb`).then(r => r.text());
+  const parserErrorLib = await fetch(`${base}lib/hoozmo/parser_error.rb`).then(r => r.text());
   const nfaLib = await fetch(`${base}lib/hoozmo/automaton/nfa.rb`).then(r => r.text());
   const stateIdLib = await fetch(`${base}lib/hoozmo/automaton/state_id.rb`).then(r => r.text());
   const dfaLib = await fetch(`${base}lib/hoozmo/automaton/dfa.rb`).then(r => r.text());
@@ -44,6 +45,7 @@ async function initHoozmo(rubyVersion = '4.0') {
   vm.eval(choiceLib);
   vm.eval(repetitionLibClean);
   vm.eval(epsilonLib);
+  vm.eval(parserErrorLib);
   vm.eval(parserLib);
   vm.eval(stateIdLibClean);
   vm.eval(nfaLibClean);

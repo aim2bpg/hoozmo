@@ -6,12 +6,18 @@
 <title>Hoozmo - Ruby regex editor</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 700px; margin: 0 auto; padding: 2em 1.5em; line-height: 1.6; background: #f8f9fa;">
-<div class="bg-white p-8 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative">
-  <div class="absolute top-4 right-4">
-    <div class="flex items-center gap-2 text-[0.85em] text-[#7f8c8d]">
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 0.5em 1em; line-height: 1.6; background: #f8f9fa;">
+
+<!-- 2カラムレイアウトコンテナ -->
+<div class="sm:flex sm:gap-4 sm:items-start">
+  <!-- Left Column: Input & Results -->
+  <div class="sm:w-[60%] max-h-[46vh] sm:max-h-[60vh] overflow-auto sm:overflow-visible">
+<div class="bg-white p-2 sm:p-6 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative mb-2 sm:mb-0">
+  <!-- Ruby Version Selector -->
+  <div class="sm:absolute sm:top-4 sm:right-4 flex justify-end mb-2 sm:mb-0">
+    <div class="flex items-center gap-2 text-[0.75em] sm:text-[0.85em] text-[#7f8c8d]">
       <span>Ruby</span>
-      <select id="ruby-version" class="px-1.5 py-0.5 border border-[#bdc3c7] rounded bg-white text-[0.95em] cursor-pointer">
+      <select id="ruby-version" class="px-1.5 py-0.5 border border-[#bdc3c7] rounded bg-white text-[0.85em] sm:text-[0.95em] cursor-pointer">
         <option value="4.0">4.0</option>
         <option value="3.4">3.4</option>
         <option value="3.3">3.3</option>
@@ -20,163 +26,163 @@
     </div>
   </div>
   
-  <div class="text-center mb-6">
-    <h1 class="text-[2em] font-bold text-[#2c3e50] mb-1 leading-tight">
+  <!-- Title -->
+  <div class="text-center mb-2 sm:mb-4 sm:mt-8">
+    <h1 class="text-[1.2em] sm:text-[2em] font-bold text-[#2c3e50] mb-0.5 sm:mb-1 leading-tight">
       <a href="https://github.com/aim2bpg/hoozmo" target="_blank" class="text-[#CC342D] no-underline hover:opacity-70 transition-opacity">Hoozmo</a>
       <span class="text-[0.6em] text-[#7f8c8d] font-normal"> (<a href="https://github.com/ydah/hoozuki" target="_blank" class="text-[#CC342D] no-underline border-b border-transparent hover:border-[#CC342D] transition-all">Hoozuki</a>-mod)</span>
     </h1>
     <p class="text-[#7f8c8d] m-0">a hobby regex engine written in Ruby</p>
   </div>
   
-  <div class="mb-4">
-    <div class="flex items-center mb-2">
+  <!-- Pattern Input -->
+  <div class="mb-2 sm:mb-3">
+    <div class="flex items-center mb-0.5 sm:mb-2">
       <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
       <div class="flex-1 flex justify-between items-center">
-        <label for="pattern" class="block m-0 font-semibold text-[#34495e] text-[0.95em] leading-normal">Your regular expression:</label>
+        <label for="pattern" class="block m-0 font-semibold text-[#34495e] text-[0.9em] sm:text-[0.95em] leading-normal">Your regular expression:</label>
         <span id="match-info" class="inline-block text-[0.85em] font-medium px-1.5 py-0.5 text-transparent border border-transparent rounded leading-normal">...</span>
       </div>
       <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
     </div>
     <div class="flex items-center gap-2">
       <span class="font-mono text-[1.5em] font-bold text-[#7f8c8d] w-[0.5em] text-center shrink-0">/</span>
-      <input id="pattern" autocomplete="off" class="flex-1 min-w-0 h-[44px] p-3 font-mono text-[0.95em] border-2 border-[#e0e0e0] rounded transition-colors focus:outline-none focus:border-[#3498db]">
+      <input id="pattern" autocomplete="off" class="flex-1 min-w-0 h-[40px] sm:h-[44px] p-2 sm:p-3 font-mono text-[0.9em] sm:text-[0.95em] border-2 border-[#e0e0e0] rounded transition-colors focus:outline-none focus:border-[#3498db]">
       <span class="font-mono text-[1.5em] font-bold text-[#7f8c8d] w-[0.5em] text-center shrink-0">/</span>
     </div>
   </div>
   
-  <div class="mb-4">
-    <div class="flex items-center mb-2">
+  <!-- Test String Input -->
+  <div class="mb-2 sm:mb-3">
+    <div class="flex items-center mb-0.5 sm:mb-2">
       <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
-      <label for="test" class="flex-1 block m-0 font-semibold text-[#34495e] text-[0.95em]">Your test string:</label>
+      <label for="test" class="flex-1 block m-0 font-semibold text-[#34495e] text-[0.9em] sm:text-[0.95em]">Your test string:</label>
       <span class="w-[calc(0.5em+0.5rem)] shrink-0"></span>
     </div>
     <div class="flex items-stretch gap-2">
       <span class="w-[0.5em] shrink-0"></span>
-      <textarea id="test" id="test" class="flex-1 min-w-0 h-[88px] p-3 font-mono text-[0.95em] border-2 border-[#e0e0e0] rounded transition-colors resize-y focus:outline-none focus:border-[#3498db]"></textarea>
+      <textarea id="test" id="test" class="flex-1 min-w-0 h-[40px] sm:h-[44px] p-2 sm:p-3 font-mono text-[0.9em] sm:text-[0.95em] border-2 border-[#e0e0e0] rounded transition-colors resize-none focus:outline-none focus:border-[#3498db]"></textarea>
       <span class="w-[0.5em] shrink-0"></span>
     </div>
   </div>
   
+  <!-- Clear Button -->
   <div class="flex justify-center">
     <button id="reset" class="px-1.5 py-0.5 bg-white text-[#34495e] border border-[#bdc3c7] rounded text-[0.95em] cursor-pointer transition-all hover:bg-[#ecf0f1] hover:border-[#95a5a6]">clear fields</button>
   </div>
 </div>
+  </div>
 
-  <!-- Examples -->
-  <div class="mt-8 max-w-3xl mx-auto text-[#34495e]">
-    <h2 class="text-[1.1em] font-semibold mb-2">Examples (supported features)</h2>
-    <p class="text-[0.95em] text-[#7f8c8d] mb-3">Click an example to insert the pattern and test string into the fields.</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">abc</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">Matches the literal string <code>abc</code>.</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="abc" data-test="abc">Insert</button>
-        </div>
+  <!-- Right Column: Examples -->
+  <div class="sm:w-[40%] mt-2 sm:mt-0 max-h-[46vh] sm:max-h-[60vh] overflow-auto border-t-2 sm:border-t-0 sm:border-l-2 border-[#e0e0e0] sm:pl-4">
+  <div class="text-[#34495e]">
+    <!-- Sticky Header -->
+    <div class="sticky top-0 bg-[#f8f9fa] pt-2 pb-2 z-10 -mx-2 px-2 sm:mx-0 sm:px-0">
+      <h2 class="text-[1em] sm:text-[1.1em] font-semibold mb-1">Examples</h2>
+      <p class="text-[0.75em] sm:text-[0.85em] text-[#7f8c8d] mb-0">Click to insert:</p>
+    </div>
+    
+    <!-- Examples Grid -->
+    <div class="grid grid-cols-1 gap-2 px-2 sm:px-0">
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="abc" data-test="abc">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">abc</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Literal string</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a|b</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">Alternation: matches <code>a</code> or <code>b</code>.</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a|b" data-test="b">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a|b" data-test="b">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a|b</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Alternation</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a|b|c</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">Multiple alternatives.</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a|b|c" data-test="c">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a|b|c" data-test="c">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a|b|c</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Multiple alternation</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a(b|c)d</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">simple grouping with alternation.</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a(b|c)d" data-test="acd">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a(b|c)d" data-test="acd">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a(b|c)d</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Grouping</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a((b|c)|d)e</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">Nested grouping with alternation.</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a((b|c)|d)e" data-test="ade">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a((b|c)|d)e" data-test="ade">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a((b|c)|d)e</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Nested grouping</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a*</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">Matches zero or more (e.g. <code>a*</code>).</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a*" data-test="aaa">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a*" data-test="aaa">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a*</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Zero or more</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a+</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">One or more (e.g. <code>a+</code>).</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a+" data-test="aaa">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a+" data-test="aaa">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a+</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">One or more</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a?</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">Optional (zero or one, e.g. <code>a?</code>).</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a?" data-test="a">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a?" data-test="a">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a?</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Optional</div>
       </div>
 
-      <div class="flex items-center justify-between bg-white p-3 rounded border">
-        <div>
-          <div class="font-mono text-[0.95em] font-medium">Pattern: <span class="font-bold">a+b*c?</span></div>
-          <div class="text-[0.9em] text-[#7f8c8d]">Combined quantifiers example.</div>
-        </div>
-        <div class="flex gap-2">
-          <button class="example-btn px-2 py-1 bg-[#ecf0f1] rounded" data-pattern="a+b*c?" data-test="aabbc">Insert</button>
-        </div>
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a+b*c?" data-test="aabbc">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a+b*c?</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Combined quantifiers</div>
+      </div>
+
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="a\*b" data-test="a*b">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">a\*b</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Escaped character</div>
+      </div>
+
+      <div class="bg-white p-2 rounded border cursor-pointer hover:bg-[#f8f9fa] transition-colors example-btn" data-pattern="cat" data-test="concatenate">
+        <div class="font-mono text-[0.85em] sm:text-[0.9em] font-bold mb-0.5">cat</div>
+        <div class="text-[0.75em] sm:text-[0.8em] text-[#7f8c8d]">Substring matching</div>
       </div>
     </div>
   </div>
+  </div>
+</div>
 
 <script type="module" src="/main.js"></script>
 <script>
-  // wire up example buttons to insert pattern/test values
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.example-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const p = btn.getAttribute('data-pattern') ?? '';
-        const t = btn.getAttribute('data-test') ?? '';
-        const patternEl = document.getElementById('pattern');
-        const testEl = document.getElementById('test');
-        if (patternEl) patternEl.value = p;
-        if (testEl) testEl.value = t;
-        // trigger input events so main.js will re-evaluate
-        patternEl?.dispatchEvent(new Event('input'));
-        testEl?.dispatchEvent(new Event('input'));
-      });
+document.addEventListener('DOMContentLoaded', () => {
+  // Example button click handlers
+  document.querySelectorAll('.example-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const pattern = btn.getAttribute('data-pattern') ?? '';
+      const test = btn.getAttribute('data-test') ?? '';
+      const patternEl = document.getElementById('pattern');
+      const testEl = document.getElementById('test');
+      
+      if (patternEl) patternEl.value = pattern;
+      if (testEl) testEl.value = test;
+      
+      patternEl?.dispatchEvent(new Event('input'));
+      testEl?.dispatchEvent(new Event('input'));
     });
   });
+
+  // Match right column height to left column on desktop/tablet
+  function matchHeights() {
+    const leftCol = document.querySelector('.sm\\:w-\\[60\\%\\]');
+    const rightCol = document.querySelector('.sm\\:w-\\[40\\%\\]');
+    
+    if (leftCol && rightCol) {
+      if (window.innerWidth >= 640) {
+        const leftInner = leftCol.querySelector('.bg-white');
+        if (leftInner) {
+          rightCol.style.maxHeight = leftInner.offsetHeight + 'px';
+        }
+      } else {
+        rightCol.style.maxHeight = '';
+      }
+    }
+  }
+  
+  setTimeout(matchHeights, 100);
+  window.addEventListener('resize', matchHeights);
+});
 </script>
 </body>
 </html>

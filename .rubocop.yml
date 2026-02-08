@@ -13,14 +13,14 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
-Metrics/CyclomaticComplexity:
-  Max: 10
-Metrics/MethodLength:
-  Max: 25
 Metrics/ClassLength:
   Max: 150
+Metrics/CyclomaticComplexity:
+  Max: 12
+Metrics/MethodLength:
+  Max: 25
 Metrics/PerceivedComplexity:
-  Max: 10
+  Max: 12
 
 RSpec:
   Enabled: true

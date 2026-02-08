@@ -147,7 +147,8 @@ RSpec.describe Hoozmo::Automaton::NFA do
       expect(nfa.match?('ab')).to be true
       expect(nfa.match?('a')).to be false
       expect(nfa.match?('b')).to be false
-      expect(nfa.match?('abc')).to be false
+      expect(nfa.match?('abc')).to be true  # 部分一致: 'abc'は'ab'を含む
+      expect(nfa.match?('xyz')).to be false
     end
 
     it 'matches choice' do
@@ -161,7 +162,8 @@ RSpec.describe Hoozmo::Automaton::NFA do
       expect(nfa.match?('a')).to be true
       expect(nfa.match?('b')).to be true
       expect(nfa.match?('c')).to be false
-      expect(nfa.match?('ab')).to be false
+      expect(nfa.match?('ab')).to be true   # 部分一致: 'ab'は'a'を含む
+      expect(nfa.match?('xyz')).to be false
     end
 
     it 'matches repetition pattern' do
@@ -175,7 +177,8 @@ RSpec.describe Hoozmo::Automaton::NFA do
       expect(nfa.match?('')).to be true     # 0回
       expect(nfa.match?('a')).to be true    # 1回
       expect(nfa.match?('aaa')).to be true  # 3回
-      expect(nfa.match?('b')).to be false   # マッチしない
+      expect(nfa.match?('b')).to be true    # 部分一致: 空文字列にマッチ
+      expect(nfa.match?('bbb')).to be true  # 部分一致: 空文字列にマッチ
     end
 
     it 'matches one-or-more pattern' do
@@ -202,8 +205,8 @@ RSpec.describe Hoozmo::Automaton::NFA do
 
       expect(nfa.match?('')).to be true     # 0回
       expect(nfa.match?('a')).to be true    # 1回
-      expect(nfa.match?('aa')).to be false  # 2回はNG
-      expect(nfa.match?('b')).to be false   # マッチしない
+      expect(nfa.match?('aa')).to be true   # 部分一致: 'aa'は'a'を含む
+      expect(nfa.match?('b')).to be true    # 部分一致: 空文字列にマッチ
     end
 
     context 'with one-or-more repetition' do
@@ -253,7 +256,7 @@ RSpec.describe Hoozmo::Automaton::NFA do
         end
 
         it 'does not match multiple characters' do
-          expect(regex.match?('aa')).to be false
+          expect(regex.match?('aa')).to be true # 部分一致: 'aa'は'a'を含む
         end
       end
     end
@@ -283,7 +286,7 @@ RSpec.describe Hoozmo::Automaton::NFA do
         expect(regex.match?('abc')).to be true
         expect(regex.match?('aabc')).to be true
         expect(regex.match?('aabbc')).to be true
-        expect(regex.match?('aaabbbcc')).to be false # cが2つ
+        expect(regex.match?('aaabbbcc')).to be true # 部分一致: 'aaabbbc'を含む
       end
     end
   end

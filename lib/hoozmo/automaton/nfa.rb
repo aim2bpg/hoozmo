@@ -49,10 +49,25 @@ class Hoozmo
       end
 
       def match?(input)
-        # 初期状態のε 閉包から始まる
+        chars = input.chars
+
+        # 各開始位置から試行
+        (0..chars.length).each do |start_pos|
+          return true if match_from?(chars, start_pos)
+        end
+
+        false
+      end
+
+      def match_from?(chars, start_pos)
+        # 初期状態のε閉包から始まる
         current_states = epsilon_closure(Set[@start])
 
-        input.each_char do |char|
+        (start_pos...chars.length).each do |i|
+          # 各ステップで受理状態かチェック
+          return true if current_states.any? { |state| @accept.include?(state) }
+
+          char = chars[i]
           # 次の状態集合を計算
           next_states = Set.new
 
@@ -63,10 +78,10 @@ class Hoozmo
             end
           end
 
-          # 遷移できなければ失敗
+          # 遷移できなければこの開始位置からは失敗
           return false if next_states.empty?
 
-          # 次の状態集合のε 閉包を計算
+          # 次の状態集合のε閉包を計算
           current_states = epsilon_closure(next_states)
         end
 
