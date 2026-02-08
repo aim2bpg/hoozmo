@@ -64,6 +64,11 @@ class Hoozmo
       raise 'Unexpected end of pattern' if eol?
 
       char = current
+
+      # バックスラッシュの処理
+      return parse_escape if char == '\\'
+
+      # メタ文字のチェック
       case char
       when '(', ')', '|', '*', '+', '?' # これらはリテラルではない
         raise "Unexpected character: #{char} at position #{@offset}"
@@ -85,8 +90,11 @@ class Hoozmo
 
       # 閉じ括弧のチェック
       if current != ')'
-        raise "Expected closing parenthesis for '(' at position #{paren_pos}. " \
-              "Got: #{current || 'end of pattern'}"
+        raise ParserError.new(
+          "Expected closing parenthesis for '(' at position #{paren_pos}. ",
+          paren_pos,
+          @pattern
+        )
       end
 
       next_char # ')' をスキップ
@@ -110,6 +118,20 @@ class Hoozmo
 
       next_char
       Node::Repetition.new(child, quantifier)
+    end
+
+    def parse_escape
+      # 現在は '\' の位置
+      escape_pos = @offset
+      next_char # '\' をスキップ
+
+      raise "Incomplete escape sequence at position #{escape_pos}" if eol?
+
+      escaped_char = current
+      next_char
+
+      # すべてリテラルとして扱う（シンプルなアプローチ）
+      Node::Literal.new(escaped_char)
     end
   end
 end

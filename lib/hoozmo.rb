@@ -2,25 +2,37 @@
 
 require_relative 'hoozmo/node'
 require_relative 'hoozmo/parser'
+require_relative 'hoozmo/parser_error'
 require_relative 'hoozmo/automaton'
 
 class Hoozmo
-  def initialize(pattern)
+  def initialize(pattern, options = {})
     @pattern = pattern
+    @options = default_options.merge(options)
 
     ast = Parser.new(pattern).parse
     nfa = Automaton::NFA.new_from_node(ast, Automaton::StateID.new(0))
-    @dfa = Automaton::DFA.from_nfa(nfa, use_cache: use_cache?(pattern))
+    @dfa = Automaton::DFA.from_nfa(nfa, @options[:cache])
   end
 
   def match?(input)
-    @dfa.match?(input, use_cache: use_cache?(input))
+    @dfa.match?(input, should_use_cache?(input))
   end
 
   private
 
-  def use_cache?(str)
-    str.length > 1000
+  def default_options
+    {
+      cache: true,
+      cache_threshold: 100
+    }
+  end
+
+  def should_use_cache?(input)
+    return false unless @options[:cache]
+
+    # 入力が長い、またはDFAの状態数が多い場合
+    input.length > @options[:cache_threshold]
   end
 
   def match_node(node, input, pos)

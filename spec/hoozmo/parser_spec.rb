@@ -69,109 +69,167 @@ RSpec.describe Hoozmo::Parser do
       expect(ast).to be_a(Hoozmo::Node::Choice)
       expect(ast.children.length).to eq(3)
     end
-  end
 
-  context 'with grouping' do
-    it 'parses simple grouped pattern' do
-      ast = described_class.new('a(b|c)d').parse
+    context 'with grouping' do
+      it 'parses simple grouped pattern' do
+        ast = described_class.new('a(b|c)d').parse
 
-      expect(ast).to be_a(Hoozmo::Node::Concatenation)
-      expect(ast.children.length).to eq(3)
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children.length).to eq(3)
 
-      # 'a'
-      expect(ast.children[0]).to be_a(Hoozmo::Node::Literal)
-      expect(ast.children[0].value).to eq('a')
+        # 'a'
+        expect(ast.children[0]).to be_a(Hoozmo::Node::Literal)
+        expect(ast.children[0].value).to eq('a')
 
-      # '(b|c)'
-      choice = ast.children[1]
-      expect(choice).to be_a(Hoozmo::Node::Choice)
-      expect(choice.children.length).to eq(2)
-      expect(choice.children[0].value).to eq('b')
-      expect(choice.children[1].value).to eq('c')
+        # '(b|c)'
+        choice = ast.children[1]
+        expect(choice).to be_a(Hoozmo::Node::Choice)
+        expect(choice.children.length).to eq(2)
+        expect(choice.children[0].value).to eq('b')
+        expect(choice.children[1].value).to eq('c')
 
-      # 'd'
-      expect(ast.children[2]).to be_a(Hoozmo::Node::Literal)
-      expect(ast.children[2].value).to eq('d')
+        # 'd'
+        expect(ast.children[2]).to be_a(Hoozmo::Node::Literal)
+        expect(ast.children[2].value).to eq('d')
+      end
+
+      it 'parses nested groups' do
+        ast = described_class.new('a((b|c)|d)e').parse
+
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children.length).to eq(3)
+
+        # 中央の複雑なグループ
+        outer_choice = ast.children[1]
+        expect(outer_choice).to be_a(Hoozmo::Node::Choice)
+        expect(outer_choice.children.length).to eq(2)
+
+        # 内側のグループ (b|c)
+        inner_choice = outer_choice.children[0]
+        expect(inner_choice).to be_a(Hoozmo::Node::Choice)
+      end
+
+      it 'parses group with empty alternative' do
+        ast = described_class.new('ab(cd|)ef').parse
+
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+
+        # グループ部分
+        choice = ast.children[2]
+        expect(choice).to be_a(Hoozmo::Node::Choice)
+        expect(choice.children.length).to eq(2)
+
+        # 空の選択肢
+        expect(choice.children[1]).to be_a(Hoozmo::Node::Epsilon)
+      end
     end
 
-    it 'parses nested groups' do
-      ast = described_class.new('a((b|c)|d)e').parse
+    context 'with error cases' do
+      it 'raises error for unmatched opening parenthesis' do
+        expect do
+          described_class.new('a(b').parse
+        end.to raise_error(/Expected closing parenthesis/)
+      end
 
-      expect(ast).to be_a(Hoozmo::Node::Concatenation)
-      expect(ast.children.length).to eq(3)
+      it 'raises error for unmatched closing parenthesis' do
+        expect do
+          described_class.new('a)b').parse
+        end.to raise_error(/Unexpected character/)
+      end
 
-      # 中央の複雑なグループ
-      outer_choice = ast.children[1]
-      expect(outer_choice).to be_a(Hoozmo::Node::Choice)
-      expect(outer_choice.children.length).to eq(2)
-
-      # 内側のグループ (b|c)
-      inner_choice = outer_choice.children[0]
-      expect(inner_choice).to be_a(Hoozmo::Node::Choice)
+      it 'raises error for nested unmatched parentheses' do
+        expect do
+          described_class.new('a((b|c)').parse
+        end.to raise_error(/Expected closing parenthesis/)
+      end
     end
 
-    it 'parses group with empty alternative' do
-      ast = described_class.new('ab(cd|)ef').parse
+    context 'with repetition' do
+      it 'parses zero-or-more pattern' do
+        ast = described_class.new('a*').parse
 
-      expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast).to be_a(Hoozmo::Node::Repetition)
+        expect(ast.zero_or_more?).to be true
+        expect(ast.child).to be_a(Hoozmo::Node::Literal)
+        expect(ast.child.value).to eq('a')
+      end
 
-      # グループ部分
-      choice = ast.children[2]
-      expect(choice).to be_a(Hoozmo::Node::Choice)
-      expect(choice.children.length).to eq(2)
+      it 'parses group repetition' do
+        ast = described_class.new('(ab)*').parse
 
-      # 空の選択肢
-      expect(choice.children[1]).to be_a(Hoozmo::Node::Epsilon)
-    end
-  end
+        expect(ast).to be_a(Hoozmo::Node::Repetition)
+        expect(ast.child).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.child.children.length).to eq(2)
+      end
 
-  context 'with error cases' do
-    it 'raises error for unmatched opening parenthesis' do
-      expect do
-        described_class.new('a(b').parse
-      end.to raise_error(/Expected closing parenthesis/)
-    end
+      it 'parses complex pattern with repetition' do
+        ast = described_class.new('a(bb)*d').parse
 
-    it 'raises error for unmatched closing parenthesis' do
-      expect do
-        described_class.new('a)b').parse
-      end.to raise_error(/Unexpected character/)
-    end
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children.length).to eq(3)
 
-    it 'raises error for nested unmatched parentheses' do
-      expect do
-        described_class.new('a((b|c)').parse
-      end.to raise_error(/Expected closing parenthesis/)
-    end
-  end
-
-  context 'with repetition' do
-    it 'parses zero-or-more pattern' do
-      ast = described_class.new('a*').parse
-
-      expect(ast).to be_a(Hoozmo::Node::Repetition)
-      expect(ast.zero_or_more?).to be true
-      expect(ast.child).to be_a(Hoozmo::Node::Literal)
-      expect(ast.child.value).to eq('a')
+        # 中央の繰り返し部分
+        repetition = ast.children[1]
+        expect(repetition).to be_a(Hoozmo::Node::Repetition)
+      end
     end
 
-    it 'parses group repetition' do
-      ast = described_class.new('(ab)*').parse
+    context 'with escape sequences' do
+      it 'parses escaped special characters' do
+        ast = described_class.new('a\*b').parse
 
-      expect(ast).to be_a(Hoozmo::Node::Repetition)
-      expect(ast.child).to be_a(Hoozmo::Node::Concatenation)
-      expect(ast.child.children.length).to eq(2)
-    end
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children.length).to eq(3)
 
-    it 'parses complex pattern with repetition' do
-      ast = described_class.new('a(bb)*d').parse
+        expect(ast.children[0].value).to eq('a')
+        expect(ast.children[1].value).to eq('*')
+        expect(ast.children[2].value).to eq('b')
+      end
 
-      expect(ast).to be_a(Hoozmo::Node::Concatenation)
-      expect(ast.children.length).to eq(3)
+      it 'parses escaped parentheses' do
+        ast = described_class.new('\(a\)').parse
 
-      # 中央の繰り返し部分
-      repetition = ast.children[1]
-      expect(repetition).to be_a(Hoozmo::Node::Repetition)
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children.length).to eq(3)
+
+        expect(ast.children[0].value).to eq('(')
+        expect(ast.children[1].value).to eq('a')
+        expect(ast.children[2].value).to eq(')')
+      end
+
+      it 'parses escaped pipe' do
+        ast = described_class.new('a\|b').parse
+
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children.length).to eq(3)
+
+        expect(ast.children[0].value).to eq('a')
+        expect(ast.children[1].value).to eq('|')
+        expect(ast.children[2].value).to eq('b')
+      end
+
+      it 'parses escaped backslash' do
+        ast = described_class.new('a\\\\b').parse
+
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children[1].value).to eq('\\')
+      end
+
+      it 'parses escaped non-metachar' do
+        ast = described_class.new('\a\b').parse
+
+        expect(ast).to be_a(Hoozmo::Node::Concatenation)
+        expect(ast.children.length).to eq(2)
+
+        expect(ast.children[0].value).to eq('a')
+        expect(ast.children[1].value).to eq('b')
+      end
+
+      it 'raises error for incomplete escape' do
+        expect do
+          described_class.new('a\\').parse
+        end.to raise_error(/Incomplete escape sequence/)
+      end
     end
   end
 end

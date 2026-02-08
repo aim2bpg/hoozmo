@@ -7,6 +7,22 @@ on:
       - main
 
 jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    name: RuboCop
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - name: Install Ruby gems
+        run: |
+          gem install bundler
+          bundle config set --local path vendor/bundle
+          bundle install --jobs 4 --retry 3
+      - name: Run RuboCop
+        run: bundle exec rubocop
+
   rspec:
     runs-on: ubuntu-latest
     name: rspec ${{ matrix.ruby }}
