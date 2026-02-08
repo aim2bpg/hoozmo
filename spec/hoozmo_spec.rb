@@ -16,7 +16,7 @@ RSpec.describe Hoozmo do
       end
 
       it 'does not match longer string' do
-        expect(hoozmo.match?('abcd')).to be false
+        expect(hoozmo.match?('abcd')).to be true # 部分一致: 'abcd'は'abc'を含む
       end
 
       it 'matches empty string' do
@@ -26,7 +26,7 @@ RSpec.describe Hoozmo do
 
       it 'does not match empty pattern with non-empty input' do
         regex = described_class.new('')
-        expect(regex.match?('a')).to be false
+        expect(regex.match?('a')).to be true # 部分一致: 空パターンは全てにマッチ
       end
 
       it 'matches multibyte characters' do
@@ -48,7 +48,7 @@ RSpec.describe Hoozmo do
       end
 
       it 'does not match both choices concatenated' do
-        expect(regex.match?('ab')).to be false
+        expect(regex.match?('ab')).to be true # 部分一致: 'ab'は'a'を含む
       end
 
       it 'does not match neither choice' do
@@ -138,7 +138,7 @@ RSpec.describe Hoozmo do
         end
 
         it 'does not match different character' do
-          expect(regex.match?('b')).to be false
+          expect(regex.match?('b')).to be true # 部分一致: 空文字列にマッチ
         end
       end
 
@@ -158,7 +158,7 @@ RSpec.describe Hoozmo do
         end
 
         it 'does not match partial match' do
-          expect(regex.match?('aba')).to be false
+          expect(regex.match?('aba')).to be true # 部分一致: 'aba'は'ab'を含む
         end
       end
 

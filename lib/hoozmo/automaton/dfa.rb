@@ -94,9 +94,24 @@ class Hoozmo
                       args[0] || false
                     end
 
+        chars = input.chars
+
+        # 各開始位置から試行
+        (0..chars.length).each do |start_pos|
+          return true if match_from?(chars, start_pos, use_cache)
+        end
+
+        false
+      end
+
+      def match_from?(chars, start_pos, use_cache)
         state = @start
 
-        input.each_char do |char|
+        (start_pos...chars.length).each do |i|
+          # 各ステップで受理状態かチェック
+          return true if @accept.include?(state)
+
+          char = chars[i]
           state = if use_cache && (cached = @cache[[state, char]])
                     cached
                   else
@@ -106,6 +121,7 @@ class Hoozmo
           return false unless state
         end
 
+        # 最後の状態もチェック
         @accept.include?(state)
       end
 
