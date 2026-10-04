@@ -1,5 +1,5 @@
 // Smoke-test a ruby+stdlib.wasm build: it must boot and report the expected RUBY_VERSION.
-import { readFileSync } from "node:fs";
+import { openSync, readFileSync, readSync, fstatSync } from "node:fs";
 import { WASI } from "node:wasi";
 import { RubyVM } from "@ruby/wasm-wasi/dist/vm";
 
@@ -16,7 +16,23 @@ const describe = (e) =>
 
 // Same as DefaultRubyVM, but keeps the WASI instance so we can read the exit code
 // when the Ruby VM calls exit during boot (Node reports that as a thrown Symbol).
-const wasi = new WASI({ version: "preview1", returnOnExit: true });
+// stdout/stderr go to files so we can show what Ruby printed before it exited.
+const outPath = `${file}.stdout.log`;
+const errPath = `${file}.stderr.log`;
+const wasi = new WASI({
+  version: "preview1",
+  returnOnExit: true,
+  stdout: openSync(outPath, "w"),
+  stderr: openSync(errPath, "w"),
+});
+const tail = (path) => {
+  const fd = openSync(path, "r");
+  const { size } = fstatSync(fd);
+  const buf = Buffer.alloc(Math.min(size, 4000));
+  readSync(fd, buf, 0, buf.length, Math.max(0, size - buf.length));
+  return buf.toString("utf8").trimEnd() || "(empty)";
+};
+
 let actual;
 try {
   const module = await WebAssembly.compile(readFileSync(file));
@@ -28,6 +44,8 @@ try {
   const exited = typeof e === "symbol" && exitSymbol !== undefined;
   const exitInfo = exited ? `exited with code ${wasi[exitSymbol]}` : "did not exit";
   console.error(`failed to boot ${file} (${exitInfo}):\n${describe(e)}`);
+  console.error(`--- ruby stderr ---\n${tail(errPath)}`);
+  console.error(`--- ruby stdout ---\n${tail(outPath)}`);
   process.exit(1);
 }
 
