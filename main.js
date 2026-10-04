@@ -7,16 +7,38 @@ const MATCH_STYLES = {
   error: 'inline-block text-[0.85em] font-medium px-1.5 py-0.5 rounded text-[#856404] bg-[#fff3cd] border border-[#ffeaa7] leading-normal'
 };
 
-async function initHoozmo(rubyVersion = '4.0') {
+// Exact Ruby patch versions served from ruby/ (built by .github/workflows/deploy.yml).
+const RUBY_RUNTIMES = {
+  '4.0': '4.0.7',
+  '3.4': '3.4.11',
+  '3.3': '3.3.12',
+};
 
-  const pkg = `@ruby/${rubyVersion}-wasm-wasi@latest`;
-  const wasmUrl = `https://cdn.jsdelivr.net/npm/${pkg}/dist/ruby+stdlib.wasm`;
-  const response = await fetch(wasmUrl);
-  const module = await WebAssembly.compileStreaming(response);
-  const { vm } = await DefaultRubyVM(module);
+async function fetchRubyRuntime(rubyVersion, base) {
+  const full = RUBY_RUNTIMES[rubyVersion];
+  if (!full) throw new Error(`Unsupported Ruby version: ${rubyVersion}`);
+
+  const local = await fetch(`${base}ruby/ruby-${full}.wasm`);
+  const isWasm = local.ok && !(local.headers.get('content-type') || '').includes('text/html');
+  if (isWasm) return local;
+
+  // Local `npm run dev` doesn't have the self-built runtimes; fall back to the npm runtime
+  // (which embeds an older Ruby patch release) so the demo still works while developing.
+  if (import.meta.env.DEV) {
+    console.warn(`ruby ${full} is not built locally; using the npm runtime instead`);
+    return fetch(`https://cdn.jsdelivr.net/npm/@ruby/${rubyVersion}-wasm-wasi@2.10.1/dist/ruby+stdlib.wasm`);
+  }
+  throw new Error(`Ruby ${full} runtime not found at ${base}ruby/ruby-${full}.wasm`);
+}
+
+async function initHoozmo(rubyVersion = '4.0') {
 
   // baseパスを考慮してfetch
   const base = import.meta.env.BASE_URL || '/';
+  const response = await fetchRubyRuntime(rubyVersion, base);
+  const module = await WebAssembly.compileStreaming(response);
+  const { vm } = await DefaultRubyVM(module);
+
   const nodeLib = await fetch(`${base}lib/hoozmo/node.rb`).then(r => r.text());
   const literalLib = await fetch(`${base}lib/hoozmo/node/literal.rb`).then(r => r.text());
   const concatenationLib = await fetch(`${base}lib/hoozmo/node/concatenation.rb`).then(r => r.text());
