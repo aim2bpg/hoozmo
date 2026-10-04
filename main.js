@@ -9,7 +9,8 @@ const MATCH_STYLES = {
 
 async function initHoozmo(rubyVersion = '4.0') {
 
-  const pkg = `@ruby/${rubyVersion}-wasm-wasi@latest`;
+  // Pinned so a new runtime release only lands when we bump this deliberately.
+  const pkg = `@ruby/${rubyVersion}-wasm-wasi@2.10.1`;
   const wasmUrl = `https://cdn.jsdelivr.net/npm/${pkg}/dist/ruby+stdlib.wasm`;
   const response = await fetch(wasmUrl);
   const module = await WebAssembly.compileStreaming(response);
