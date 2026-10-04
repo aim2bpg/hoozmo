@@ -17,7 +17,74 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Builds the Ruby WASI runtimes the browser loads (ruby+stdlib.wasm) from source with
+  # ruby.wasm's rbwasm on x86_64, so the exact patch versions are used instead of whatever
+  # the npm runtime packages happen to embed.
+  ruby-runtime:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["4.0.7", "3.4.11", "3.3.12"]
+    env:
+      RUBY_VERSION: ${{ matrix.ruby }}
+      RBWASM_VERSION: "2.10.1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Ruby (host, runs rbwasm)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install npm dependencies (for the smoke test)
+        run: npm ci
+
+      - name: Restore built runtime
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: out/ruby-${{ matrix.ruby }}.wasm
+          key: ruby-wasm-${{ matrix.ruby }}-rbwasm-${{ env.RBWASM_VERSION }}-v1
+
+      - name: Install rbwasm
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: gem install ruby_wasm -v "$RBWASM_VERSION" --no-document
+
+      - name: Fetch Ruby source
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          MM="${RUBY_VERSION%.*}"
+          curl -fsSL "https://cache.ruby-lang.org/pub/ruby/${MM}/ruby-${RUBY_VERSION}.tar.gz" | tar xz -C "$RUNNER_TEMP"
+
+      - name: Build ruby.wasm
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p out
+          rbwasm build --ruby-version "$RUNNER_TEMP/ruby-$RUBY_VERSION" -o "out/ruby-$RUBY_VERSION.wasm"
+
+      - name: Smoke test (boots and reports the expected version)
+        run: node scripts/verify-ruby-wasm.mjs "out/ruby-$RUBY_VERSION.wasm" "$RUBY_VERSION"
+
+      - name: Upload runtime artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ruby-wasm-${{ matrix.ruby }}
+          path: out/ruby-${{ matrix.ruby }}.wasm
+          if-no-files-found: error
+
   build:
+    needs: ruby-runtime
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
     runs-on: ubuntu-latest
     steps:
@@ -25,25 +92,32 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-      
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: '24'
-          cache: 'npm'
-      
+          node-version: "24"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm install
-      
+
       - name: Build
         run: npm run build
+
+      - name: Add Ruby runtimes
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ruby-wasm-*
+          path: dist/ruby
+          merge-multiple: true
 
       - name: Disable Jekyll
         run: |
           if [ -d ./dist ]; then
             touch ./dist/.nojekyll
           fi
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
