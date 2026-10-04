@@ -56,6 +56,8 @@ jobs:
         with:
           path: out/ruby-${{ matrix.ruby }}.wasm
           key: ruby-wasm-${{ matrix.ruby }}-rbwasm-${{ env.RBWASM_VERSION }}-js-v3
+          # Save the built runtime even when the smoke test fails, so the next run only re-tests it.
+          save-always: true
 
       - name: Fetch Ruby source
         if: steps.cache.outputs.cache-hit != 'true'
