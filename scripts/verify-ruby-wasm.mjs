@@ -8,9 +8,20 @@ if (!file || !expected) {
   process.exit(2);
 }
 
-const module = await WebAssembly.compile(readFileSync(file));
-const { vm } = await DefaultRubyVM(module);
-const actual = vm.eval("RUBY_VERSION").toString();
+// Print enough detail to diagnose a failed boot (Node's default output can be empty).
+const describe = (e) =>
+  `${e?.name ?? typeof e}: ${e?.message ?? String(e)}\n${e?.stack ?? ""}` +
+  (e?.cause ? `\ncause: ${describe(e.cause)}` : "");
+
+let actual;
+try {
+  const module = await WebAssembly.compile(readFileSync(file));
+  const { vm } = await DefaultRubyVM(module);
+  actual = vm.eval("RUBY_VERSION").toString();
+} catch (e) {
+  console.error(`failed to boot ${file}:\n${describe(e)}`);
+  process.exit(1);
+}
 
 if (actual !== expected) {
   console.error(`expected Ruby ${expected}, got ${actual}`);
