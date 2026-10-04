@@ -55,11 +55,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: out/ruby-${{ matrix.ruby }}.wasm
-          key: ruby-wasm-${{ matrix.ruby }}-rbwasm-${{ env.RBWASM_VERSION }}-js-v2
-
-      - name: Install rbwasm
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: gem install ruby_wasm -v "$RBWASM_VERSION" --no-document
+          key: ruby-wasm-${{ matrix.ruby }}-rbwasm-${{ env.RBWASM_VERSION }}-js-v3
 
       - name: Fetch Ruby source
         if: steps.cache.outputs.cache-hit != 'true'
@@ -67,14 +63,18 @@ jobs:
           MM="${RUBY_VERSION%.*}"
           curl -fsSL "https://cache.ruby-lang.org/pub/ruby/${MM}/ruby-${RUBY_VERSION}.tar.gz" | tar xz -C "$RUNNER_TEMP"
 
-      # rbwasm bundles the gems from the Gemfile of the directory it runs in. The browser
-      # bridge (@ruby/wasm-wasi) needs the `js` gem, which the project Gemfile doesn't have,
-      # so build from a dedicated directory whose Gemfile is just `gem "js"`.
-      - name: Prepare rbwasm project (js gem)
+      # rbwasm only picks up the gems of a Gemfile when it runs under Bundler (`bundle exec`),
+      # and the browser bridge (@ruby/wasm-wasi) needs the `js` gem in the build. So build from a
+      # dedicated directory whose Gemfile lists rbwasm and js, and run rbwasm through bundler.
+      - name: Prepare rbwasm project
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/rbwasm-project"
-          printf 'source "https://rubygems.org"\ngem "js", "%s"\n' "$RBWASM_VERSION" > "$RUNNER_TEMP/rbwasm-project/Gemfile"
+          cat > "$RUNNER_TEMP/rbwasm-project/Gemfile" <<EOF
+          source "https://rubygems.org"
+          gem "ruby_wasm", "$RBWASM_VERSION"
+          gem "js", "$RBWASM_VERSION"
+          EOF
           cd "$RUNNER_TEMP/rbwasm-project" && bundle install
 
       - name: Build ruby.wasm
@@ -82,7 +82,7 @@ jobs:
         run: |
           mkdir -p out
           cd "$RUNNER_TEMP/rbwasm-project"
-          rbwasm build --ruby-version "$RUNNER_TEMP/ruby-$RUBY_VERSION" -o "$GITHUB_WORKSPACE/out/ruby-$RUBY_VERSION.wasm"
+          bundle exec rbwasm build --ruby-version "$RUNNER_TEMP/ruby-$RUBY_VERSION" -o "$GITHUB_WORKSPACE/out/ruby-$RUBY_VERSION.wasm"
 
       - name: Smoke test (boots and reports the expected version)
         run: node scripts/verify-ruby-wasm.mjs "out/ruby-$RUBY_VERSION.wasm" "$RUBY_VERSION"
