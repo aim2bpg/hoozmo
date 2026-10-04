@@ -55,7 +55,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: out/ruby-${{ matrix.ruby }}.wasm
-          key: ruby-wasm-${{ matrix.ruby }}-rbwasm-${{ env.RBWASM_VERSION }}-v1
+          key: ruby-wasm-${{ matrix.ruby }}-rbwasm-${{ env.RBWASM_VERSION }}-js-v2
 
       - name: Install rbwasm
         if: steps.cache.outputs.cache-hit != 'true'
@@ -67,11 +67,22 @@ jobs:
           MM="${RUBY_VERSION%.*}"
           curl -fsSL "https://cache.ruby-lang.org/pub/ruby/${MM}/ruby-${RUBY_VERSION}.tar.gz" | tar xz -C "$RUNNER_TEMP"
 
+      # rbwasm bundles the gems from the Gemfile of the directory it runs in. The browser
+      # bridge (@ruby/wasm-wasi) needs the `js` gem, which the project Gemfile doesn't have,
+      # so build from a dedicated directory whose Gemfile is just `gem "js"`.
+      - name: Prepare rbwasm project (js gem)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/rbwasm-project"
+          printf 'source "https://rubygems.org"\ngem "js", "%s"\n' "$RBWASM_VERSION" > "$RUNNER_TEMP/rbwasm-project/Gemfile"
+          cd "$RUNNER_TEMP/rbwasm-project" && bundle install
+
       - name: Build ruby.wasm
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p out
-          rbwasm build --ruby-version "$RUNNER_TEMP/ruby-$RUBY_VERSION" -o "out/ruby-$RUBY_VERSION.wasm"
+          cd "$RUNNER_TEMP/rbwasm-project"
+          rbwasm build --ruby-version "$RUNNER_TEMP/ruby-$RUBY_VERSION" -o "$GITHUB_WORKSPACE/out/ruby-$RUBY_VERSION.wasm"
 
       - name: Smoke test (boots and reports the expected version)
         run: node scripts/verify-ruby-wasm.mjs "out/ruby-$RUBY_VERSION.wasm" "$RUBY_VERSION"
